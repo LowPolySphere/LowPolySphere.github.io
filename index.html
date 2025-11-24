@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Flip Animation Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .upload-area {
+            transition: border-color 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #6366f1;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="p-8">
+        <div class="max-w-6xl mx-auto">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2 text-center">
+                Card Flip Animation Generator
+            </h1>
+            <p class="text-gray-600 text-center mb-8">
+                Upload front and back images to generate flip animation frames
+            </p>
+
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <!-- Front Image Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Front Side
+                        </label>
+                        <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                            <input type="file" accept="image/*" id="front-upload" class="hidden">
+                            <label for="front-upload" class="cursor-pointer block">
+                                <div id="front-preview">
+                                    <svg class="w-12 h-12 text-gray-400 mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    <span class="text-gray-600">Click to upload front image</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Back Image Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Back Side
+                        </label>
+                        <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                            <input type="file" accept="image/*" id="back-upload" class="hidden">
+                            <label for="back-upload" class="cursor-pointer block">
+                                <div id="back-preview">
+                                    <svg class="w-12 h-12 text-gray-400 mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    <span class="text-gray-600">Click to upload back image</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Frame Count Control -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Number of Frames: <span id="frame-count-display">30</span>
+                    </label>
+                    <input type="range" min="5" max="60" value="30" id="frame-count" class="w-full">
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span>5 frames (faster)</span>
+                        <span>60 frames (smoother)</span>
+                    </div>
+                </div>
+
+                <!-- Generate Button -->
+                <button id="generate-btn" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+                    Generate Frames
+                </button>
+            </div>
+
+            <!-- Canvas (hidden) -->
+            <canvas id="canvas" class="hidden"></canvas>
+
+            <!-- Generated Frames -->
+            <div id="frames-container" class="bg-white rounded-lg shadow-lg p-8 hidden">
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800">
+                            Generated Frames (<span id="frame-total">0</span>)
+                        </h2>
+                    </div>
+                    <div class="flex gap-4 items-end">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                File Name Prefix
+                            </label>
+                            <input 
+                                type="text" 
+                                id="filename-prefix" 
+                                value="card_flip_frame" 
+                                placeholder="e.g., card_flip_frame"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                            <p class="text-xs text-gray-500 mt-1">Files will be named: prefix_000.png, prefix_001.png, etc.</p>
+                        </div>
+                        <button id="download-all-btn" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors whitespace-nowrap">
+                            Download All
+                        </button>
+                    </div>
+                </div>
+                <div id="frames-grid" class="grid grid-cols-5 gap-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let frontImage = null;
+        let backImage = null;
+        let frames = [];
+
+        // Handle front image upload
+        document.getElementById('front-upload').addEventListener('change', function(e) {
+            handleImageUpload(e, 'front');
+        });
+
+        // Handle back image upload
+        document.getElementById('back-upload').addEventListener('change', function(e) {
+            handleImageUpload(e, 'back');
+        });
+
+        // Handle frame count slider
+        document.getElementById('frame-count').addEventListener('input', function(e) {
+            document.getElementById('frame-count-display').textContent = e.target.value;
+        });
+
+        // Handle generate button
+        document.getElementById('generate-btn').addEventListener('click', generateFrames);
+
+        // Handle download all button
+        document.getElementById('download-all-btn').addEventListener('click', downloadAllFrames);
+
+        function handleImageUpload(e, side) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        if (side === 'front') {
+                            frontImage = img;
+                            document.getElementById('front-preview').innerHTML = 
+                                `<img src="${img.src}" alt="Front" class="max-h-48 mx-auto rounded">`;
+                        } else {
+                            backImage = img;
+                            document.getElementById('back-preview').innerHTML = 
+                                `<img src="${img.src}" alt="Back" class="max-h-48 mx-auto rounded">`;
+                        }
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function generateFrames() {
+            if (!frontImage || !backImage) {
+                alert('Please upload both front and back images');
+                return;
+            }
+
+            const btn = document.getElementById('generate-btn');
+            btn.disabled = true;
+            btn.textContent = 'Generating Frames...';
+
+            const frameCount = parseInt(document.getElementById('frame-count').value);
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            const width = Math.max(frontImage.width, backImage.width);
+            const height = Math.max(frontImage.height, backImage.height);
+            canvas.width = width;
+            canvas.height = height;
+
+            frames = [];
+
+            for (let i = 0; i < frameCount; i++) {
+                const progress = i / (frameCount - 1);
+                const angle = progress * Math.PI;
+                
+                ctx.clearRect(0, 0, width, height);
+                ctx.save();
+                
+                ctx.translate(width / 2, height / 2);
+                
+                const scale = Math.abs(Math.cos(angle));
+                const showFront = Math.cos(angle) >= 0;
+                const currentImage = showFront ? frontImage : backImage;
+                
+                if (!showFront) {
+                    ctx.scale(-1, 1);
+                }
+                
+                ctx.scale(scale, 1);
+                
+                ctx.drawImage(
+                    currentImage,
+                    -currentImage.width / 2,
+                    -currentImage.height / 2,
+                    currentImage.width,
+                    currentImage.height
+                );
+                
+                ctx.restore();
+                
+                const frameData = canvas.toDataURL('image/png');
+                frames.push(frameData);
+                
+                if (i % 5 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                }
+            }
+
+            displayFrames();
+            btn.disabled = false;
+            btn.textContent = 'Generate Frames';
+        }
+
+        function displayFrames() {
+            const container = document.getElementById('frames-container');
+            const grid = document.getElementById('frames-grid');
+            const total = document.getElementById('frame-total');
+            
+            container.classList.remove('hidden');
+            total.textContent = frames.length;
+            grid.innerHTML = '';
+
+            frames.forEach((frame, index) => {
+                const div = document.createElement('div');
+                div.className = 'relative group';
+                div.innerHTML = `
+                    <img src="${frame}" alt="Frame ${index}" class="w-full rounded border border-gray-200">
+                    <button class="download-frame-btn absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded" data-index="${index}">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                    </button>
+                    <span class="text-xs text-gray-500 text-center block mt-1">Frame ${index}</span>
+                `;
+                grid.appendChild(div);
+            });
+
+            // Add click handlers to download buttons
+            document.querySelectorAll('.download-frame-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    downloadFrame(frames[index], index);
+                });
+            });
+        }
+
+        function downloadFrame(frameData, index) {
+            const link = document.createElement('a');
+            link.download = `card_flip_frame_${String(index).padStart(3, '0')}.png`;
+            link.href = frameData;
+            link.click();
+        }
+
+        function downloadAllFrames() {
+            frames.forEach((frame, index) => {
+                setTimeout(() => {
+                    downloadFrame(frame, index);
+                }, index * 100);
+            });
+        }
+    </script>
+</body>
+</html>
