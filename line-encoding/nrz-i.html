@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRZ-I Encoding - Digital Signal Visualizer</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-encoding="nrzi">
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">📡 Signal Encoder</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="visualizer.html">All Encodings</a></li>
+                <li><a href="reference.html">Reference</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div style="background: rgba(0,0,0,0.2); padding: 10px 0;">
+        <div class="container">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <a href="nrz-l.html" class="btn btn-sm btn-secondary">NRZ-L</a>
+                <a href="nrz-i.html" class="btn btn-sm btn-primary">NRZ-I</a>
+                <a href="ami.html" class="btn btn-sm btn-secondary">AMI</a>
+                <a href="pseudoternary.html" class="btn btn-sm btn-secondary">Pseudoternary</a>
+                <a href="manchester.html" class="btn btn-sm btn-secondary">Manchester</a>
+                <a href="diff-manchester.html" class="btn btn-sm btn-secondary">Diff. Manchester</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="page-header">
+            <h1 style="color: #feca57;">NRZ-I Encoding</h1>
+            <p>Non-Return to Zero - Inverted</p>
+        </div>
+
+        <div class="card">
+            <div class="input-section">
+                <label for="binaryInput">Binary Input:</label>
+                <input type="text" id="binaryInput" placeholder="e.g., 10110010" maxlength="16">
+                <button class="btn btn-primary" onclick="handleGenerate()">Generate</button>
+                <button class="btn btn-secondary" onclick="handleRandom()">Random</button>
+            </div>
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+
+        <div class="card nrz-i">
+            <h3><span class="indicator"></span>NRZ-I Signal</h3>
+            <div class="graph-container">
+                <canvas id="canvas-nrzi" class="graph-canvas" height="180"></canvas>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <span>Bit 1 = Transition</span>
+                </div>
+                <div class="legend-item">
+                    <span>Bit 0 = No Transition</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detailed-info">
+            <div class="card">
+                <h3>📐 Encoding Rules</h3>
+                <div class="detail-box">
+                    <ul>
+                        <li><strong>Bit 1:</strong> Transition at the beginning of bit interval</li>
+                        <li><strong>Bit 0:</strong> No transition (maintain current level)</li>
+                        <li>Differential encoding - polarity independent</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card">
+                <h3>⚡ Properties</h3>
+                <div class="pros-cons">
+                    <div class="pros">
+                        <h5>✓ Advantages</h5>
+                        <ul>
+                            <li>Polarity independent</li>
+                            <li>Better sync on sequences of 1s</li>
+                            <li>Used in USB</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h5>✗ Disadvantages</h5>
+                        <ul>
+                            <li>Long 0s cause sync loss</li>
+                            <li>DC component</li>
+                            <li>Not self-clocking</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="ami.html" class="btn btn-primary">Next: Bipolar AMI →</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>Digital Signal Encoding Visualizer | Data Communications & Networking</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

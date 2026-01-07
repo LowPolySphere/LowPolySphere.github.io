@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Encodings - Digital Signal Visualizer</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="logo">📡 Signal Encoder</a>
+            <ul class="nav-links">
+                <li><a href="../index.html">DevToolbox</a></li>
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="visualizer.html">All Encodings</a></li>
+                <li><a href="reference.html">Reference</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>All Encoding Methods</h1>
+            <p>Compare all six encoding schemes side by side</p>
+        </div>
+
+        <div class="card">
+            <div class="input-section">
+                <label for="binaryInput">Binary Input:</label>
+                <input type="text" id="binaryInput" placeholder="e.g., 10110010" maxlength="16">
+                <button class="btn btn-primary" onclick="handleGenerate()">Generate</button>
+                <button class="btn btn-secondary" onclick="handleRandom()">Random</button>
+                <button class="btn btn-secondary" onclick="handleClear()">Clear</button>
+            </div>
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-line" style="background: #4ade80;"></div>
+                <span>+V (High)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line" style="background: #fbbf24;"></div>
+                <span>0V (Zero)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line" style="background: #f87171;"></div>
+                <span>-V (Low)</span>
+            </div>
+        </div>
+
+        <div class="graphs-grid" style="margin-top: 20px;">
+            <!-- NRZ-L -->
+            <div class="card nrz-l">
+                <h3><span class="indicator"></span>NRZ-L (Non-Return to Zero - Level)</h3>
+                <a href="nrz-l.html" class="btn btn-sm btn-secondary" style="float: right; margin-top: -35px;">Details →</a>
+                <div class="graph-container">
+                    <canvas id="canvas-nrzl" class="graph-canvas" height="140"></canvas>
+                </div>
+            </div>
+
+            <!-- NRZ-I -->
+            <div class="card nrz-i">
+                <h3><span class="indicator"></span>NRZ-I (Non-Return to Zero - Inverted)</h3>
+                <a href="nrz-i.html" class="btn btn-sm btn-secondary" style="float: right; margin-top: -35px;">Details →</a>
+                <div class="graph-container">
+                    <canvas id="canvas-nrzi" class="graph-canvas" height="140"></canvas>
+                </div>
+            </div>
+
+            <!-- Bipolar AMI -->
+            <div class="card ami">
+                <h3><span class="indicator"></span>Bipolar AMI (Alternate Mark Inversion)</h3>
+                <a href="ami.html" class="btn btn-sm btn-secondary" style="float: right; margin-top: -35px;">Details →</a>
+                <div class="graph-container">
+                    <canvas id="canvas-ami" class="graph-canvas" height="140"></canvas>
+                </div>
+            </div>
+
+            <!-- Pseudoternary -->
+            <div class="card pseudo">
+                <h3><span class="indicator"></span>Pseudoternary</h3>
+                <a href="pseudoternary.html" class="btn btn-sm btn-secondary" style="float: right; margin-top: -35px;">Details →</a>
+                <div class="graph-container">
+                    <canvas id="canvas-pseudo" class="graph-canvas" height="140"></canvas>
+                </div>
+            </div>
+
+            <!-- Manchester -->
+            <div class="card manchester">
+                <h3><span class="indicator"></span>Manchester</h3>
+                <a href="manchester.html" class="btn btn-sm btn-secondary" style="float: right; margin-top: -35px;">Details →</a>
+                <div class="graph-container">
+                    <canvas id="canvas-manchester" class="graph-canvas" height="140"></canvas>
+                </div>
+            </div>
+
+            <!-- Differential Manchester -->
+            <div class="card diff-manchester">
+                <h3><span class="indicator"></span>Differential Manchester</h3>
+                <a href="diff-manchester.html" class="btn btn-sm btn-secondary" style="float: right; margin-top: -35px;">Details →</a>
+                <div class="graph-container">
+                    <canvas id="canvas-diffmanchester" class="graph-canvas" height="140"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Digital Signal Encoding Visualizer | Data Communications & Networking</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

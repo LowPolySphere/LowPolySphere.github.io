@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encoding Reference - Digital Signal Visualizer</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="logo">📡 Signal Encoder</a>
+            <ul class="nav-links">
+                <li><a href="../index.html">DevToolbox</a></li>
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="visualizer.html">All Encodings</a></li>
+                <li><a href="reference.html">Reference</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>📚 Encoding Reference Guide</h1>
+            <p>Complete reference for all digital signal encoding schemes</p>
+        </div>
+
+        <!-- Quick Reference Table -->
+        <div class="card">
+            <h2>Quick Reference Table</h2>
+            <div style="overflow-x: auto;">
+                <table class="rules-table">
+                    <thead>
+                        <tr>
+                            <th>Encoding</th>
+                            <th>Bit 0</th>
+                            <th>Bit 1</th>
+                            <th>Voltage Levels</th>
+                            <th>Self-Clocking</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>NRZ-L</strong></td>
+                            <td>Low voltage (-V)</td>
+                            <td>High voltage (+V)</td>
+                            <td>2 levels</td>
+                            <td>❌ No</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NRZ-I</strong></td>
+                            <td>No transition</td>
+                            <td>Transition at start</td>
+                            <td>2 levels</td>
+                            <td>❌ No</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bipolar AMI</strong></td>
+                            <td>Zero voltage (0V)</td>
+                            <td>Alternating +V/-V</td>
+                            <td>3 levels</td>
+                            <td>❌ No</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pseudoternary</strong></td>
+                            <td>Alternating +V/-V</td>
+                            <td>Zero voltage (0V)</td>
+                            <td>3 levels</td>
+                            <td>❌ No</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Manchester</strong></td>
+                            <td>High→Low transition</td>
+                            <td>Low→High transition</td>
+                            <td>2 levels</td>
+                            <td>✅ Yes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diff. Manchester</strong></td>
+                            <td>Transition at start + middle</td>
+                            <td>Transition at middle only</td>
+                            <td>2 levels</td>
+                            <td>✅ Yes</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Detailed Information Cards -->
+        <div class="info-grid" style="margin-top: 30px;">
+            <!-- NRZ-L -->
+            <div class="card nrz-l">
+                <h3><span class="indicator"></span>NRZ-L (Non-Return to Zero - Level)</h3>
+                <div class="info-card">
+                    <h4>Encoding Rules</h4>
+                    <ul>
+                        <li><strong>Bit 1:</strong> Represented by high voltage (+V)</li>
+                        <li><strong>Bit 0:</strong> Represented by low voltage (-V)</li>
+                        <li>Signal level directly corresponds to bit value</li>
+                        <li>No transition occurs in the middle of a bit interval</li>
+                        <li>Transition only occurs when bit value changes</li>
+                    </ul>
+                </div>
+                <div class="pros-cons" style="margin-top: 15px;">
+                    <div class="pros">
+                        <h5>✓ Advantages</h5>
+                        <ul>
+                            <li>Simple implementation</li>
+                            <li>Easy to generate and decode</li>
+                            <li>Efficient bandwidth usage</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h5>✗ Disadvantages</h5>
+                        <ul>
+                            <li>No self-clocking capability</li>
+                            <li>DC component present</li>
+                            <li>Sync issues with long runs</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <span class="tag">Simple</span>
+                    <span class="tag">2-Level</span>
+                </div>
+            </div>
+
+            <!-- NRZ-I -->
+            <div class="card nrz-i">
+                <h3><span class="indicator"></span>NRZ-I (Non-Return to Zero - Inverted)</h3>
+                <div class="info-card">
+                    <h4>Encoding Rules</h4>
+                    <ul>
+                        <li><strong>Bit 1:</strong> Causes a transition at the beginning of the interval</li>
+                        <li><strong>Bit 0:</strong> No transition occurs (signal stays at current level)</li>
+                        <li>Also known as NRZI or differential encoding</li>
+                        <li>Polarity independent - inverting signal doesn't affect decoding</li>
+                    </ul>
+                </div>
+                <div class="pros-cons" style="margin-top: 15px;">
+                    <div class="pros">
+                        <h5>✓ Advantages</h5>
+                        <ul>
+                            <li>Polarity independent</li>
+                            <li>Better sync on 1s</li>
+                            <li>Simple differential encoding</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h5>✗ Disadvantages</h5>
+                        <ul>
+                            <li>Long runs of 0s cause sync loss</li>
+                            <li>Still has DC component</li>
+                            <li>Not self-clocking</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <span class="tag">USB</span>
+                    <span class="tag">Differential</span>
+                </div>
+            </div>
+
+            <!-- Bipolar AMI -->
+            <div class="card ami">
+                <h3><span class="indicator"></span>Bipolar AMI (Alternate Mark Inversion)</h3>
+                <div class="info-card">
+                    <h4>Encoding Rules</h4>
+                    <ul>
+                        <li><strong>Bit 0:</strong> Represented by zero voltage (0V)</li>
+                        <li><strong>Bit 1:</strong> Alternates between positive (+V) and negative (-V) voltage</li>
+                        <li>First 1 is +V, next 1 is -V, then +V, and so on</li>
+                        <li>Uses three voltage levels: +V, 0, -V</li>
+                        <li>Violation of alternation indicates error</li>
+                    </ul>
+                </div>
+                <div class="pros-cons" style="margin-top: 15px;">
+                    <div class="pros">
+                        <h5>✓ Advantages</h5>
+                        <ul>
+                            <li>No DC component</li>
+                            <li>Error detection capability</li>
+                            <li>Lower bandwidth than NRZ</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h5>✗ Disadvantages</h5>
+                        <ul>
+                            <li>Long 0s cause sync loss</li>
+                            <li>Requires 3 signal levels</li>
+                            <li>Not self-clocking</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <span class="tag">Telecom</span>
+                    <span class="tag">T1/E1</span>
+                    <span class="tag">3-Level</span>
+                </div>
+            </div>
+
+            <!-- Pseudoternary -->
+            <div class="card pseudo">
+                <h3><span class="indicator"></span>Pseudoternary</h3>
+                <div class="info-card">
+                    <h4>Encoding Rules</h4>
+                    <ul>
+                        <li><strong>Bit 1:</strong> Represented by zero voltage (0V)</li>
+                        <li><strong>Bit 0:</strong> Alternates between positive (+V) and negative (-V) voltage</li>
+                        <li>Exact opposite of Bipolar AMI</li>
+                        <li>First 0 is +V, next 0 is -V, then +V, and so on</li>
+                        <li>Uses three voltage levels: +V, 0, -V</li>
+                    </ul>
+                </div>
+                <div class="pros-cons" style="margin-top: 15px;">
+                    <div class="pros">
+                        <h5>✓ Advantages</h5>
+                        <ul>
+                            <li>No DC component</li>
+                            <li>Same advantages as AMI</li>
+                            <li>Error detection possible</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h5>✗ Disadvantages</h5>
+                        <ul>
+                            <li>Long 1s cause sync loss</li>
+                            <li>Requires 3 signal levels</li>
+                            <li>Not commonly used</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <span class="tag">ISDN</span>
+                    <span class="tag">3-Level</span>
+                </div>
+            </div>
+
+            <!-- Manchester -->
+            <div class="card manchester">
+                <h3><span class="indicator"></span>Manchester Encoding</h3>
+                <div class="info-card">
+                    <h4>Encoding Rules (G.E. Thomas Convention)</h4>
+                    <ul>
+                        <li><strong>Bit 1:</strong> Low-to-High transition in the middle of bit interval</li>
+                        <li><strong>Bit 0:</strong> High-to-Low transition in the middle of bit interval</li>
+                        <li>Every bit has a transition in the middle</li>
+                        <li>Additional transitions may occur at bit boundaries</li>
+                        <li>Transition direction determines bit value</li>
+                    </ul>
+                </div>
+                <div class="pros-cons" style="margin-top: 15px;">
+                    <div class="pros">
+                        <h5>✓ Advantages</h5>
+                        <ul>
+                            <li>Self-clocking</li>
+                            <li>No DC component</li>
+                            <li>Easy error detection</li>
+                            <li>Always synchronized</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h5>✗ Disadvantages</h5>
+                        <ul>
+                            <li>Requires 2x bandwidth</li>
+                            <li>More complex circuitry</li>
+                            <li>Less efficient</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <span class="tag">Ethernet 10BASE-T</span>
+                    <span class="tag">Self-Clocking</span>
+                </div>
+            </div>
+
+            <!-- Differential Manchester -->
+            <div class="card diff-manchester">
+                <h3><span class="indicator"></span>Differential Manchester</h3>
+                <div class="info-card">
+                    <h4>Encoding Rules</h4>
+                    <ul>
+                        <li><strong>Always:</strong> Transition in the middle of every bit interval</li>
+                        <li><strong>Bit 0:</strong> Transition at the beginning of bit interval</li>
+                        <li><strong>Bit 1:</strong> No transition at the beginning of bit interval</li>
+                        <li>Mid-bit transition is for clocking only</li>
+                        <li>Start-of-bit transition (or lack thereof) carries data</li>
+                    </ul>
+                </div>
+                <div class="pros-cons" style="margin-top: 15px;">
+                    <div class="pros">
+                        <h5>✓ Advantages</h5>
+                        <ul>
+                            <li>Self-clocking</li>
+                            <li>Polarity independent</li>
+                            <li>Excellent noise immunity</li>
+                            <li>Reliable synchronization</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h5>✗ Disadvantages</h5>
+                        <ul>
+                            <li>Requires 2x bandwidth</li>
+                            <li>Complex implementation</li>
+                            <li>More transitions needed</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <span class="tag">Token Ring</span>
+                    <span class="tag">Self-Clocking</span>
+                    <span class="tag">Robust</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="card" style="margin-top: 30px;">
+            <h2>📊 When to Use Each Encoding</h2>
+            <div class="info-grid" style="margin-top: 20px;">
+                <div class="info-card">
+                    <h4>Use NRZ-L/NRZ-I when:</h4>
+                    <ul>
+                        <li>Simplicity is priority</li>
+                        <li>External clock is available</li>
+                        <li>Short distance transmission</li>
+                        <li>Bandwidth efficiency needed</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h4>Use Bipolar AMI when:</h4>
+                    <ul>
+                        <li>DC balance is required</li>
+                        <li>Error detection is needed</li>
+                        <li>Long-distance transmission</li>
+                        <li>Telephone systems (T1/E1)</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h4>Use Manchester when:</h4>
+                    <ul>
+                        <li>Self-clocking is essential</li>
+                        <li>Ethernet networks (10Mbps)</li>
+                        <li>Reliable sync required</li>
+                        <li>Error detection important</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h4>Use Diff. Manchester when:</h4>
+                    <ul>
+                        <li>Maximum noise immunity needed</li>
+                        <li>Polarity independence required</li>
+                        <li>Token Ring networks</li>
+                        <li>High reliability environments</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Digital Signal Encoding Visualizer | Data Communications & Networking</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
