@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voltage Drop & Power Analysis</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(to bottom right, #0f172a, #312e81, #0f172a);
+      color: white;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      color: #c7d2fe;
+    }
+
+    .card {
+      background: #1e293b;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #a5b4fc;
+      margin-bottom: 1.5rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: bold;
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+
+    input {
+      width: 100%;
+      background: #334155;
+      border: 2px solid #475569;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      color: white;
+      font-size: 1.125rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+
+    .circuit-diagram {
+      background: #020617;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      color: #4ade80;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .status-card {
+      border: 2px solid;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+    }
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .metric {
+      margin-bottom: 1.5rem;
+    }
+
+    .metric-label {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-value {
+      font-weight: bold;
+    }
+
+    .value-large {
+      font-size: 2.5rem;
+      color: #fbbf24;
+    }
+
+    .value-medium {
+      font-size: 2rem;
+      color: #f87171;
+    }
+
+    .power-box {
+      background: #020617;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .recommendation-card {
+      background: rgba(30, 58, 138, 0.3);
+      border: 2px solid #3b82f6;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .sensor-button {
+      width: 100%;
+      text-align: left;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      border: 2px solid #475569;
+      background: #334155;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 0.5rem;
+    }
+
+    .sensor-button:hover {
+      border-color: #64748b;
+    }
+
+    .sensor-button.active {
+      background: #4f46e5;
+      border-color: #818cf8;
+    }
+
+    .sensor-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .takeaways {
+      background: linear-gradient(to right, rgba(49, 46, 129, 0.5), rgba(88, 28, 135, 0.5));
+      border: 2px solid #6366f1;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .takeaway-item {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      color: #e2e8f0;
+    }
+
+    .icon {
+      min-width: 30px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-title">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+          <polyline points="17 6 23 6 23 12"></polyline>
+        </svg>
+        <h1>Voltage Drop & Power Analysis</h1>
+      </div>
+      <p class="subtitle">Understanding the trade-offs of series resistor protection</p>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Configuration</h2>
+      <div class="grid grid-4">
+        <div class="input-group">
+          <label>Supply Voltage (V)</label>
+          <input type="number" id="supplyVoltage" value="3.3" step="0.1">
+        </div>
+        <div class="input-group">
+          <label>Series Resistor (Ω)</label>
+          <input type="number" id="resistorValue" value="330" step="10">
+        </div>
+        <div class="input-group">
+          <label>Sensor Current (mA)</label>
+          <input type="number" id="sensorCurrent" value="1" step="0.1">
+        </div>
+        <div class="input-group">
+          <label>Zener Leakage (µA)</label>
+          <input type="number" id="zenerLeakage" value="2" step="0.5">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Circuit Analysis</h2>
+      <div class="circuit-diagram" id="circuitDiagram"></div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="status-card" id="voltageStatus">
+        <div class="status-header">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <h2 style="font-size: 1.5rem; font-weight: bold;">Voltage Drop Status</h2>
+        </div>
+        <div id="voltageMetrics"></div>
+      </div>
+
+      <div class="card">
+        <div class="status-header">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <h2 style="font-size: 1.5rem; font-weight: bold;">Power Impact</h2>
+        </div>
+        <div id="powerMetrics"></div>
+      </div>
+    </div>
+
+    <div class="recommendation-card">
+      <div class="status-header">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        <h2 style="font-size: 1.5rem; font-weight: bold; color: #93c5fd;">Recommendation for Your Current</h2>
+      </div>
+      <div id="recommendations"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Common Sensor Current Examples</h2>
+      <p style="color: #cbd5e1; margin-bottom: 1rem; font-size: 0.875rem;">
+        Click on sensor types to see their voltage drop with your current resistor setting:
+      </p>
+      <div id="sensorExamples"></div>
+    </div>
+
+    <div class="takeaways">
+      <h2 class="card-title">🎯 Key Takeaways</h2>
+      <div class="takeaway-item">
+        <div class="icon" style="color: #4ade80;">✓</div>
+        <p><strong>Power consumption increase is negligible</strong> - zener leakage is typically under 5µA, adding less than 0.02mW</p>
+      </div>
+      <div class="takeaway-item">
+        <div class="icon" style="color: #fbbf24;">⚠️</div>
+        <p><strong>Voltage drop is the main concern</strong> - it's directly proportional to sensor current and resistor value</p>
+      </div>
+      <div class="takeaway-item">
+        <div class="icon" style="color: #60a5fa;">💡</div>
+        <p><strong>Trade-off:</strong> Larger resistor = better protection but more voltage drop. Smaller resistor = less drop but less protection</p>
+      </div>
+      <div class="takeaway-item">
+        <div class="icon" style="color: #c084fc;">📊</div>
+        <p><strong>For low-current sensors (&lt;2mA):</strong> 330Ω is perfect - minimal drop, excellent protection</p>
+      </div>
+      <div class="takeaway-item">
+        <div class="icon" style="color: #fb923c;">🔧</div>
+        <p><strong>For high-current sensors (&gt;5mA):</strong> Consider 47-100Ω or alternative protection methods like TVS diodes or level shifters</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sensorExamples = [
+      { name: 'Digital GPIO Input', current: 0.001, typical: '1µA', safe: true },
+      { name: 'I2C Device (idle)', current: 0.1, typical: '100µA', safe: true },
+      { name: 'Temperature Sensor', current: 0.5, typical: '500µA', safe: true },
+      { name: 'I2C Device (active)', current: 1, typical: '1mA', safe: true },
+      { name: 'Analog Sensor', current: 2, typical: '2mA', safe: true },
+      { name: 'UART Device', current: 3, typical: '3mA', safe: true },
+      { name: 'Active Sensor Module', current: 5, typical: '5mA', safe: false },
+      { name: 'LED Indicator', current: 10, typical: '10mA', safe: false },
+      { name: 'Small Motor/Relay', current: 50, typical: '50mA', safe: false }
+    ];
+
+    function getInputs() {
+      return {
+        supplyVoltage: parseFloat(document.getElementById('supplyVoltage').value) || 0,
+        resistorValue: parseFloat(document.getElementById('resistorValue').value) || 1,
+        sensorCurrent: parseFloat(document.getElementById('sensorCurrent').value) || 0,
+        zenerLeakage: parseFloat(document.getElementById('zenerLeakage').value) || 0
+      };
+    }
+
+    function getRecommendedResistor(current) {
+      if (current <= 1) return { value: 330, note: 'Good balance' };
+      if (current <= 5) return { value: 100, note: 'Reduce drop' };
+      if (current <= 10) return { value: 47, note: 'High current' };
+      return { value: 22, note: 'Very high current - consider alternative protection' };
+    }
+
+    function updateDisplay() {
+      const { supplyVoltage, resistorValue, sensorCurrent, zenerLeakage } = getInputs();
+      
+      const voltageDrop = (sensorCurrent * resistorValue) / 1000;
+      const sensorVoltage = supplyVoltage - voltageDrop;
+      const powerInResistor = sensorCurrent * voltageDrop;
+      const totalCurrent = sensorCurrent + (zenerLeakage / 1000);
+      const totalPower = supplyVoltage * totalCurrent;
+      const powerIncrease = (zenerLeakage / 1000) * supplyVoltage;
+      
+      // Circuit diagram
+      document.getElementById('circuitDiagram').textContent = `
+${supplyVoltage}V ──[${resistorValue}Ω]──┬── ${sensorVoltage.toFixed(3)}V to Sensor
+                       │
+                       │ ${sensorCurrent}mA →
+                       │
+                      ╱│╲ 3.6V Zener
+                      ╲│╱ (${zenerLeakage}µA leakage)
+                       │
+                      GND
+
+VOLTAGE DROP:      ${voltageDrop.toFixed(3)}V across resistor
+SENSOR VOLTAGE:    ${sensorVoltage.toFixed(3)}V (${((sensorVoltage/supplyVoltage)*100).toFixed(1)}% of supply)
+DROP PERCENTAGE:   ${((voltageDrop/supplyVoltage)*100).toFixed(1)}% of supply voltage
+
+POWER ANALYSIS:
+- Resistor power:  ${powerInResistor.toFixed(2)} mW
+- Zener leakage:   ${powerIncrease.toFixed(4)} mW (negligible)
+- Total power:     ${totalPower.toFixed(2)} mW`;
+
+      // Voltage status
+      let statusColor, statusText;
+      if (sensorVoltage >= 3.2) {
+        statusColor = '#22c55e';
+        statusText = 'Excellent - Minimal drop';
+      } else if (sensorVoltage >= 3.0) {
+        statusColor = '#eab308';
+        statusText = 'Acceptable - Small drop';
+      } else if (sensorVoltage >= 2.5) {
+        statusColor = '#f97316';
+        statusText = 'Marginal - Significant drop';
+      } else {
+        statusColor = '#ef4444';
+        statusText = 'Critical - Excessive drop!';
+      }
+      
+      const voltageStatusEl = document.getElementById('voltageStatus');
+      voltageStatusEl.style.borderColor = statusColor;
+      voltageStatusEl.style.background = statusColor + '33';
+      
+      document.getElementById('voltageMetrics').innerHTML = `
+        <div class="metric">
+          <div class="metric-label">Sensor Receives:</div>
+          <div class="metric-value value-large">${sensorVoltage.toFixed(3)}V</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Voltage Drop:</div>
+          <div class="metric-value value-medium">-${voltageDrop.toFixed(3)}V</div>
+          <div style="font-size: 0.875rem; color: #cbd5e1;">
+            (${((voltageDrop/supplyVoltage)*100).toFixed(1)}% loss)
+          </div>
+        </div>
+        <div style="padding: 0.75rem; border-radius: 0.5rem; background: ${statusColor}44;">
+          <p style="font-weight: bold;">${statusText}</p>
+        </div>
+      `;
+
+      // Power metrics
+      document.getElementById('powerMetrics').innerHTML = `
+        <div class="power-box">
+          <div class="metric-label">WITHOUT Protection:</div>
+          <div style="font-size: 1.5rem; font-weight: bold; color: #4ade80;">
+            ${(supplyVoltage * sensorCurrent).toFixed(2)} mW
+          </div>
+          <div style="font-size: 0.75rem; color: #64748b;">
+            (Sensor only: ${sensorCurrent}mA × ${supplyVoltage}V)
+          </div>
+        </div>
+        <div class="power-box">
+          <div class="metric-label">WITH Protection:</div>
+          <div style="font-size: 1.5rem; font-weight: bold; color: #fbbf24;">
+            ${totalPower.toFixed(2)} mW
+          </div>
+          <div style="font-size: 0.75rem; color: #64748b;">
+            (Total: ${totalCurrent.toFixed(3)}mA × ${supplyVoltage}V)
+          </div>
+        </div>
+        <div style="background: rgba(34, 197, 94, 0.3); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #22c55e;">
+          <div class="metric-label">Power Increase:</div>
+          <div style="font-size: 1.25rem; font-weight: bold; color: #86efac;">
+            +${powerIncrease.toFixed(4)} mW
+          </div>
+          <div style="font-size: 0.75rem; color: #bbf7d0; margin-top: 0.25rem;">
+            Only ${((powerIncrease/totalPower)*100).toFixed(2)}% increase (negligible!)
+          </div>
+        </div>
+      `;
+
+      // Recommendations
+      const recommended = getRecommendedResistor(sensorCurrent);
+      const recDrop = (sensorCurrent * recommended.value) / 1000;
+      const recVoltage = supplyVoltage - recDrop;
+      const recPower = sensorCurrent * recDrop;
+      
+      document.getElementById('recommendations').innerHTML = `
+        <div class="grid grid-2">
+          <div>
+            <p style="font-size: 1.125rem; margin-bottom: 1rem;">
+              At <strong style="color: #fbbf24;">${sensorCurrent}mA</strong>, the recommended resistor is:
+            </p>
+            <div style="background: #1e293b; padding: 1rem; border-radius: 0.5rem;">
+              <div style="font-size: 2rem; font-weight: bold; color: #4ade80; margin-bottom: 0.5rem;">
+                ${recommended.value}Ω
+              </div>
+              <div style="font-size: 0.875rem; color: #cbd5e1;">${recommended.note}</div>
+              ${recommended.value !== resistorValue ? `
+                <div style="margin-top: 0.75rem; color: #fcd34d; font-size: 0.875rem;">
+                  ⚠️ Your current setting (${resistorValue}Ω) may not be optimal
+                </div>
+              ` : ''}
+            </div>
+          </div>
+          <div style="background: #1e293b; padding: 1rem; border-radius: 0.5rem;">
+            <h3 style="font-weight: bold; color: #a5b4fc; margin-bottom: 0.75rem;">With ${recommended.value}Ω resistor:</h3>
+            <div style="font-size: 0.875rem;">
+              <p style="margin-bottom: 0.5rem;">• Voltage drop: <strong style="color: #fbbf24;">${recDrop.toFixed(3)}V</strong></p>
+              <p style="margin-bottom: 0.5rem;">• Sensor voltage: <strong style="color: #4ade80;">${recVoltage.toFixed(3)}V</strong></p>
+              <p>• Resistor power: <strong style="color: #fb923c;">${recPower.toFixed(2)}mW</strong></p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Sensor examples
+      const examplesHTML = sensorExamples.map(sensor => {
+        const drop = (sensor.current * resistorValue) / 1000;
+        const resultV = supplyVoltage - drop;
+        const isGood = drop < 0.3;
+        const isActive = Math.abs(sensorCurrent - sensor.current) < 0.001;
+        
+        return `
+          <button class="sensor-button ${isActive ? 'active' : ''}" onclick="setSensorCurrent(${sensor.current})">
+            <div class="sensor-content">
+              <div style="flex: 1;">
+                <div style="font-weight: bold; margin-bottom: 0.25rem;">${sensor.name}</div>
+                <div style="font-size: 0.875rem; color: #cbd5e1;">
+                  Typical current: ${sensor.typical}
+                </div>
+              </div>
+              <div style="text-align: right; margin-right: 1rem;">
+                <div style="font-size: 1.125rem; font-weight: bold; color: ${isGood ? '#4ade80' : '#fb923c'};">
+                  ${resultV.toFixed(2)}V
+                </div>
+                <div style="font-size: 0.875rem; color: ${isGood ? '#86efac' : '#fdba74'};">
+                  -${drop.toFixed(2)}V drop
+                </div>
+              </div>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${isGood ? '#4ade80' : '#fb923c'}" stroke-width="2">
+                ${isGood 
+                  ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'
+                  : '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>'
+                }
+              </svg>
+            </div>
+          </button>
+        `;
+      }).join('');
+      
+      document.getElementById('sensorExamples').innerHTML = examplesHTML;
+    }
+
+    function setSensorCurrent(value) {
+      document.getElementById('sensorCurrent').value = value;
+      updateDisplay();
+    }
+
+    // Add event listeners
+    ['supplyVoltage', 'resistorValue', 'sensorCurrent', 'zenerLeakage'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateDisplay);
+    });
+
+    // Initial display
+    updateDisplay();
+  </script>
+</body>
+</html>
